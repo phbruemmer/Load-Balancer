@@ -35,16 +35,12 @@ class ServerConfig:
             self.thread_pool = [thread for thread in self.thread_pool if thread.is_alive()]
             print("[update_thread_pool] thread pool up to date.")
 
-    class ServerNodes:
-        def __init__(self):
-            self.nodes = []
-
-    def handle_client(self, args):
+    def handle_client(self, args) -> None:
         client_sock, client_addr = args
         data = client_sock.recv(1024).decode()
         print(data)
 
-    def run(self):
+    def run(self) -> None:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
             sock.bind((self.ip, self.port))
             sock.listen(self.max_clients)
@@ -54,6 +50,14 @@ class ServerConfig:
                 self.TaskManager.start_client_thread(self.task_manager, (client_sock, client_addr))
 
 
+class LoadBalancer:
+    def __init__(self):
+        self.server = ServerConfig(ip="127.0.0.1", port=8000)
+
+    class ServerNodes:
+        def __init__(self):
+            self.nodes = []
+
+
 if __name__ == '__main__':
-    server_config = ServerConfig(ip="127.0.0.1", port=8000)
-    server_config.run()
+    pass
