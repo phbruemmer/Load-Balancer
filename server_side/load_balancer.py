@@ -11,19 +11,21 @@ class ServerConfig:
         # std. configuration
         self.max_clients = 32
 
+        self.task_manager = self.TaskManager(self)
+
     class TaskManager:
-        def __init__(self):
+        def __init__(self, s_config):
+            self.server_config = s_config
             self.threads = 0
             self.thread_pool = []
 
-        def start_client_thread(self, target, *args) -> None:
-            client_thread = threading.Thread(target=self.client_thread_wrapper, args=(target, args))
+        def start_client_thread(self, args) -> None:
+            client_thread = threading.Thread(target=self.client_thread_wrapper, args=(args,))
             client_thread.start()
 
-        def client_thread_wrapper(self, arg_data) -> None:
-            target, args = arg_data
-            print(f"[client_thread_wrapper] new thread started to execute function at {target}")
-            target(args)
+        def client_thread_wrapper(self, args) -> None:
+            print(f"[client_thread_wrapper] new thread started to execute function at {args}")
+            self.server_config.handle_client(args)
             print("[client_thread_wrapper] closing thread...")
             self.update_thread_pool()
             self.threads -= 1
@@ -37,8 +39,10 @@ class ServerConfig:
         def __init__(self):
             self.nodes = []
 
-    def handle_client(self):
-        pass
+    def handle_client(self, args):
+        client_sock, client_addr = args
+        data = client_sock.recv(1024).decode()
+        print(data)
 
     def run(self):
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
@@ -47,7 +51,7 @@ class ServerConfig:
 
             while True:
                 client_sock, client_addr = sock.accept()
-                self.TaskManager.start_client_thread(self.handle_client, (client_sock, client_addr))
+                self.TaskManager.start_client_thread(self.task_manager, (client_sock, client_addr))
 
 
 if __name__ == '__main__':
