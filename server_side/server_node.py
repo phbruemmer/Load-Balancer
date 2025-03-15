@@ -41,10 +41,16 @@ class NodeData:
             self.thread_pool = [thread for thread in self.thread_pool if thread.is_alive()]
             print("[update_thread_pool] updated thread pool.")
 
+
     def run(self):
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
             sock.bind((self.ip, self.port))
-            # sock.listen(self.max_node_connections)
+            sock.listen(self.max_node_connections)
+            print(f"[run] Server listening on {self.ip}:{self.port}")
+
+            while True:
+                client_sock, client_addr = sock.accept()
+
 
 
 if __name__ == '__main__':
