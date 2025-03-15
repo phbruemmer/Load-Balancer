@@ -31,16 +31,17 @@ class NodeData:
 
         def thread_wrapper(self, initial_target, *args) -> None:
             initial_target(args)
+            self.update_thread_pool()
             self.threads -= 1
 
         def update_thread_pool(self) -> None:
             self.thread_pool = [thread for thread in self.thread_pool if thread.is_alive()]
             print("[update_thread_pool] updated thread pool.")
 
-
-
         def create_new_async(self):
-            pass
+            if self.async_tasks < self.max_async_tasks:
+                # create new async-task
+                pass
 
 
 if __name__ == '__main__':
